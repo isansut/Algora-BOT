@@ -3,27 +3,27 @@ const fs = require("fs");
 const randomName = require("random-name");
 const readline = require("readline-sync");
 
-// Minta input referral code dan jumlah akun yang ingin dibuat
+
 const referralCode = readline.question("Masukkan referral code: ");
 const jumlahAkun = parseInt(readline.question("Masukkan jumlah akun yang ingin dibuat: "), 10);
 
-// Fungsi untuk generate nama + angka (digunakan untuk email & username)
+
 function generateRandomNameWithNumber() {
-    const firstName = randomName.first(); 
-    const randomNumber = Math.floor(1000 + Math.random() * 9000); 
+    const firstName = randomName.first(); // Ambil nama depan random
+    const randomNumber = Math.floor(1000 + Math.random() * 9000); // 4 digit angka
     return `${firstName}${randomNumber}`;
 }
 
-// Fungsi untuk registrasi ke Algora
+
 async function registerAlgora() {
     for (let i = 0; i < jumlahAkun; i++) {
         try {
-            let nameWithNumber = generateRandomNameWithNumber(); 
-            let email = `${nameWithNumber.toLowerCase()}@gmail.com`; 
+            let nameWithNumber = generateRandomNameWithNumber();
+            let email = `${nameWithNumber.toLowerCase()}@gmail.com`;
             let password = "Pass1234"; 
             let username = nameWithNumber; 
 
-            // Request register akun
+
             let response = await axios.post(
                 "https://api-v1.algora.network/account/create",
                 {
@@ -41,14 +41,14 @@ async function registerAlgora() {
             );
 
             if (response.status === 200 && response.data.token) {
-                let token = response.data.token;
-                console.log(`✅ Berhasil daftar: ${email} | ${password} | ${username} | Token: ${token}`);
+                let token = response.data.token; 
+                console.log(`✅ Berhasil daftar: ${email} | ${password} | ${username}`);
 
-                // Membuat miner setelah mendapatkan token
                 await createMiner(token);
 
-                // Simpan ke file txt
-                fs.appendFileSync("accounts.txt", `${email} | ${password} | ${username} | ${token}\n`);
+                fs.appendFileSync("accounts.txt", `${email} | ${password} | ${username}\n`);
+
+                fs.appendFileSync("tokens.txt", `${token}\n`);
             } else {
                 console.log(`❌ Gagal daftar untuk ${email}`);
             }
@@ -58,7 +58,6 @@ async function registerAlgora() {
     }
 }
 
-// Fungsi untuk membuat miner
 async function createMiner(token) {
     try {
         let response = await axios.post(
